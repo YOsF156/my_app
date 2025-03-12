@@ -50,99 +50,162 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         title: Text('Home'),
         leading: IconButton(
-          icon: Icon(Icons.menu),
+          icon: Icon(Icons.menu, color: Colors.white),
           onPressed: _openSettings, // Open Settings as a slide-in panel
         ),
       ),
-      body: Center(
-        child: Padding(
-          padding: EdgeInsets.all(16.0),
-          child: _buildHomeContent(
-              currentDay, hasCompletedConfiguration, userProvider),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xFF32254B), Color(0xFF32254B).withOpacity(0.8)],
+            stops: [0.0, 1.0],
+          ),
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+                horizontal: 20), // Padding for the entire content
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Moon GIF (assumed placed in assets/moon.gif)
+                Image.asset(
+                  'assets/moon.gif', // Already downloaded and placed here
+                  width: 100,
+                  height: 100,
+                ),
+                SizedBox(height: 20),
+                // Welcome Text
+                Text(
+                  'Welcome Back',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: 10),
+                Text(
+                  'Sleep. Reset. Play',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: 40),
+                // Progress Circle
+                Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    SizedBox(
+                      width: 150,
+                      height: 150,
+                      child: CircularProgressIndicator(
+                        value: currentDay / 30,
+                        strokeWidth: 10,
+                        backgroundColor: Colors.white.withOpacity(0.2),
+                        valueColor:
+                            AlwaysStoppedAnimation<Color>(Color(0xFF00C4CC)),
+                      ),
+                    ),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          '0$currentDay/30',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          '04 Feb 2025', // Replace with dynamic date if needed
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                SizedBox(height: 40),
+                // Start Session Button with adjusted padding
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                      horizontal: 0), // Minimal padding on the sides
+                  child: ElevatedButton(
+                    onPressed: () {
+                      if (currentDay == 1 && !hasCompletedConfiguration) {
+                        Navigator.pushNamed(context, '/configuration')
+                            .then((_) async {
+                          try {
+                            await FirebaseFirestore.instance
+                                .collection('users')
+                                .doc(userProvider.uid)
+                                .set({
+                              'hasCompletedConfiguration': true,
+                            }, SetOptions(merge: true));
+                            userProvider.updateHasCompletedConfiguration(true);
+                            print(
+                                'Configuration completed and updated in Firestore');
+                            _navigateToRandomQuote(currentDay, userProvider);
+                          } catch (e) {
+                            print(
+                                'Failed to update hasCompletedConfiguration: $e');
+                            _navigateToRandomQuote(currentDay, userProvider);
+                          }
+                        });
+                      } else {
+                        _navigateToSessionInstructions(
+                            currentDay, userProvider);
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: Size(double.infinity, 50), // Full width
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                      backgroundColor: Colors.transparent,
+                      padding: EdgeInsets.zero,
+                    ),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [Color(0xFF7B4FFF), Color(0xFFF4A261)],
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                        ),
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                      child: Center(
+                        child: Text(
+                          'START TODAY\'S SESSION',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
-  }
-
-  Widget _buildHomeContent(int currentDay, bool hasCompletedConfiguration,
-      UserProvider userProvider) {
-    if (currentDay <= 30) {
-      return Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(currentDay == 1
-              ? 'Welcome to SleepReset'
-              : 'Welcome Back Sleep. Reset. Play'),
-          Text(
-              'Start your 30-day journey to better rest with science-backed sleep strategies.'),
-          SizedBox(height: 20),
-          Text('Day $currentDay/30 - ${DateTime.now().day} Feb 2025'),
-          SizedBox(height: 20),
-          ElevatedButton(
-            onPressed: () {
-              if (currentDay == 1 && !hasCompletedConfiguration) {
-                Navigator.pushNamed(context, '/configuration').then((_) async {
-                  // Update Firestore and UserProvider after configuration
-                  try {
-                    await FirebaseFirestore.instance
-                        .collection('users')
-                        .doc(userProvider.uid)
-                        .set({
-                      'hasCompletedConfiguration': true,
-                    }, SetOptions(merge: true));
-                    userProvider.updateHasCompletedConfiguration(true);
-                    print('Configuration completed and updated in Firestore');
-                    _navigateToRandomQuote(currentDay, userProvider);
-                  } catch (e) {
-                    print('Failed to update hasCompletedConfiguration: $e');
-                    // Proceed even if Firestore update fails
-                    _navigateToRandomQuote(currentDay, userProvider);
-                  }
-                });
-              } else {
-                _navigateToSessionInstructions(currentDay, userProvider);
-              }
-            },
-            child: Text('START TODAY\'S SESSION'),
-          ),
-        ],
-      );
-    } else {
-      return Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text('Program Complete!'),
-          SizedBox(height: 20),
-          ElevatedButton(
-            onPressed: () async {
-              try {
-                await FirebaseFirestore.instance
-                    .collection('users')
-                    .doc(userProvider.uid)
-                    .set({
-                  'currentDay': 1,
-                  'hasCompletedConfiguration': false,
-                }, SetOptions(merge: true));
-                userProvider.updateCurrentDay(1);
-                userProvider.updateHasCompletedConfiguration(false);
-                print('Program restarted');
-              } catch (e) {
-                print('Failed to restart program: $e');
-              }
-            },
-            child: Text('Restart Program'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              print('Fast SleepReset pressed');
-            },
-            child: Text('Fast SleepReset'),
-          ),
-        ],
-      );
-    }
   }
 
   void _navigateToRandomQuote(int currentDay, UserProvider userProvider) {
