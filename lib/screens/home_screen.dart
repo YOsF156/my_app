@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:my_app/screens/settings_screen.dart'; // Add this import
+import 'package:provider/provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:my_app/providers/user_provider.dart';
+import 'package:my_app/screens/settings_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -7,9 +10,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int currentDay = 1; // Tracks the current day (1–30)
-  bool hasCompletedConfiguration = false; // Tracks if configuration is done
-
   void _openSettings() {
     showGeneralDialog(
       context: context,
@@ -33,6 +33,21 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context);
+    final currentDay = userProvider.currentDay ?? 1;
+    final hasCompletedConfiguration =
+        userProvider.hasCompletedConfiguration ?? false;
+
+    // If userProvider.uid is null, redirect to login (user not logged in)
+    if (userProvider.uid == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.pushReplacementNamed(context, '/');
+      });
+      return Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Home'),
@@ -44,13 +59,15 @@ class _HomeScreenState extends State<HomeScreen> {
       body: Center(
         child: Padding(
           padding: EdgeInsets.all(16.0),
-          child: _buildHomeContent(),
+          child: _buildHomeContent(
+              currentDay, hasCompletedConfiguration, userProvider),
         ),
       ),
     );
   }
 
-  Widget _buildHomeContent() {
+  Widget _buildHomeContent(int currentDay, bool hasCompletedConfiguration,
+      UserProvider userProvider) {
     if (currentDay <= 30) {
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -66,14 +83,26 @@ class _HomeScreenState extends State<HomeScreen> {
           ElevatedButton(
             onPressed: () {
               if (currentDay == 1 && !hasCompletedConfiguration) {
-                Navigator.pushNamed(context, '/configuration').then((_) {
-                  setState(() {
-                    hasCompletedConfiguration = true;
-                    _navigateToRandomQuote();
-                  });
+                Navigator.pushNamed(context, '/configuration').then((_) async {
+                  // Update Firestore and UserProvider after configuration
+                  try {
+                    await FirebaseFirestore.instance
+                        .collection('users')
+                        .doc(userProvider.uid)
+                        .set({
+                      'hasCompletedConfiguration': true,
+                    }, SetOptions(merge: true));
+                    userProvider.updateHasCompletedConfiguration(true);
+                    print('Configuration completed and updated in Firestore');
+                    _navigateToRandomQuote(currentDay, userProvider);
+                  } catch (e) {
+                    print('Failed to update hasCompletedConfiguration: $e');
+                    // Proceed even if Firestore update fails
+                    _navigateToRandomQuote(currentDay, userProvider);
+                  }
                 });
               } else {
-                _navigateToSessionInstructions();
+                _navigateToSessionInstructions(currentDay, userProvider);
               }
             },
             child: Text('START TODAY\'S SESSION'),
@@ -87,11 +116,21 @@ class _HomeScreenState extends State<HomeScreen> {
           Text('Program Complete!'),
           SizedBox(height: 20),
           ElevatedButton(
-            onPressed: () {
-              setState(() {
-                currentDay = 1;
-                hasCompletedConfiguration = false;
-              });
+            onPressed: () async {
+              try {
+                await FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(userProvider.uid)
+                    .set({
+                  'currentDay': 1,
+                  'hasCompletedConfiguration': false,
+                }, SetOptions(merge: true));
+                userProvider.updateCurrentDay(1);
+                userProvider.updateHasCompletedConfiguration(false);
+                print('Program restarted');
+              } catch (e) {
+                print('Failed to restart program: $e');
+              }
             },
             child: Text('Restart Program'),
           ),
@@ -106,28 +145,51 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  void _navigateToRandomQuote() {
+  void _navigateToRandomQuote(int currentDay, UserProvider userProvider) {
     Navigator.pushNamed(
       context,
       '/random-quote',
       arguments: currentDay == 1,
     ).then((_) {
-      _navigateToSessionInstructions();
+      _navigateToSessionInstructions(currentDay, userProvider);
     });
   }
 
-  void _navigateToSessionInstructions() {
+  void _navigateToSessionInstructions(
+      int currentDay, UserProvider userProvider) {
     Navigator.pushNamed(
       context,
       '/session-instructions',
       arguments: currentDay == 1,
-    ).then((_) {
-      setState(() {
-        if (currentDay < 30)
-          currentDay++;
-        else
-          currentDay = 31;
-      });
+    ).then((_) async {
+      if (currentDay < 30) {
+        try {
+          final newDay = currentDay + 1;
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(userProvider.uid)
+              .set({
+            'currentDay': newDay,
+          }, SetOptions(merge: true));
+          userProvider.updateCurrentDay(newDay);
+          print('Progressed to day $newDay');
+        } catch (e) {
+          print('Failed to update currentDay: $e');
+        }
+      } else {
+        try {
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(userProvider.uid)
+              .set({
+            'currentDay': 31,
+          }, SetOptions(merge: true));
+          userProvider.updateCurrentDay(31);
+          print('Program completed');
+        } catch (e) {
+          print('Failed to update currentDay to 31: $e');
+        }
+      }
     });
   }
 }
