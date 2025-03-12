@@ -1,4 +1,3 @@
-// lib/screens/settings_screen.dart
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -8,19 +7,17 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  // Function to show reset progress confirmation dialog
   void _showResetProgressDialog() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20.0),
-          ),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
           child: Container(
             padding: EdgeInsets.all(20.0),
             decoration: BoxDecoration(
-              color: Color(0xFF32254B), // Dark purple background
+              color: Color(0xFF32254B),
               borderRadius: BorderRadius.circular(20.0),
             ),
             child: Column(
@@ -34,30 +31,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     color: Color(0xFF32254B),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(
-                    Icons.question_answer,
-                    color: Colors.white,
-                    size: 30,
-                  ),
+                  child: Icon(Icons.question_answer,
+                      color: Colors.white, size: 30),
                 ),
                 SizedBox(height: 20),
                 Text(
                   'Do you really want to reset your progress?',
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                  ),
+                  style: TextStyle(color: Colors.white, fontSize: 16),
                 ),
                 SizedBox(height: 20),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    // NO button
                     ElevatedButton(
-                      onPressed: () {
-                        Navigator.of(context).pop(); // Close dialog
-                      },
+                      onPressed: () => Navigator.of(context).pop(),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.transparent,
                         side: BorderSide(color: Colors.white),
@@ -65,16 +53,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           borderRadius: BorderRadius.circular(20.0),
                         ),
                       ),
-                      child: Text(
-                        'NO',
-                        style: TextStyle(color: Colors.white),
-                      ),
+                      child: Text('NO', style: TextStyle(color: Colors.white)),
                     ),
-                    // YES button
                     ElevatedButton(
                       onPressed: () {
-                        // Reset progress logic here
-                        Navigator.of(context).pop(); // Close dialog
+                        Navigator.of(context).pop();
                         _resetProgress();
                       },
                       style: ElevatedButton.styleFrom(
@@ -83,10 +66,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           borderRadius: BorderRadius.circular(20.0),
                         ),
                       ),
-                      child: Text(
-                        'YES',
-                        style: TextStyle(color: Color(0xFF32254B)),
-                      ),
+                      child: Text('YES',
+                          style: TextStyle(color: Color(0xFF32254B))),
                     ),
                   ],
                 ),
@@ -98,39 +79,35 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  // Function to reset progress
   void _resetProgress() {
-    // Here you would reset the user's progress in Firebase
-    // For now, we'll just navigate to the success screen
     Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => ProgressResetSuccessfulScreen(),
-      ),
+      MaterialPageRoute(builder: (context) => ProgressResetSuccessfulScreen()),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor:
-          Colors.black.withOpacity(0.5), // Semi-transparent background
-      body: Center(
+    return Material(
+      color: Colors.transparent,
+      child: Align(
+        alignment: Alignment.centerLeft,
         child: Container(
-          width: 300, // Adjust width as needed
+          width: MediaQuery.of(context).size.width * 0.75,
+          height: double.infinity,
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(15),
+            borderRadius: BorderRadius.only(
+              topRight: Radius.circular(15),
+              bottomRight: Radius.circular(15),
+            ),
           ),
           child: Column(
-            mainAxisSize: MainAxisSize.min,
             children: [
-              // Header with "Settings" and close button
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
                 decoration: BoxDecoration(
-                  color: Color(0xFF32254B), // Dark purple header
+                  color: Color(0xFF32254B),
                   borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(15),
                     topRight: Radius.circular(15),
                   ),
                 ),
@@ -147,76 +124,71 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                     IconButton(
                       icon: Icon(Icons.close, color: Colors.white),
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
+                      onPressed: () => Navigator.of(context).pop(),
                     ),
                   ],
                 ),
               ),
-              // Settings options
-              Padding(
-                padding: EdgeInsets.symmetric(vertical: 10),
-                child: Column(
+              Expanded(
+                child: ListView(
                   children: [
-                    // Reset Progress
                     _buildSettingOption(
                       icon: Icons.restart_alt,
                       title: 'Reset Progress',
                       onTap: _showResetProgressDialog,
                     ),
-                    // Change Password
                     _buildSettingOption(
                       icon: Icons.lock,
                       title: 'Change Password',
                       onTap: () {
-                        // Add change password logic
+                        print('Change Password tapped');
                       },
                     ),
-                    // Set Reminder Time
                     _buildSettingOption(
                       icon: Icons.access_time,
                       title: 'Set Reminder Time',
-                      onTap: () {
-                        Navigator.pushNamed(context, '/reminders');
-                      },
+                      onTap: () => Navigator.pushNamed(context, '/reminders'),
                     ),
-                    // Privacy Policy / Terms of Use
                     _buildSettingOption(
                       icon: Icons.description,
                       title: 'Privacy Policy / Terms of Use',
                       onTap: () {
-                        // Add privacy policy navigation
+                        print('Privacy Policy tapped');
                       },
                     ),
-                    // Contact Support
                     _buildSettingOption(
                       icon: Icons.support_agent,
                       title: 'Contact Support',
                       onTap: () {
-                        // Add contact support logic
+                        print('Contact Support tapped');
                       },
                     ),
-                    // About SleepReset
                     _buildSettingOption(
                       icon: Icons.info,
                       title: 'About SleepReset',
-                      onTap: () {
-                        // Add about screen navigation
-                      },
+                      onTap: () => Navigator.pushNamed(
+                          context, '/about-us'), // Navigate to About Us
                     ),
                   ],
                 ),
               ),
-              // App version at the bottom
               Padding(
                 padding: EdgeInsets.all(10),
-                child: Text(
-                  'App Version 2.1.0',
-                  style: TextStyle(
-                    color: Colors.grey,
-                    fontSize: 12,
-                  ),
+                child: Column(
+                  children: [
+                    Text(
+                      'LogoIpsum',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      'App Version 2.1.0',
+                      style: TextStyle(color: Colors.grey, fontSize: 12),
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -226,7 +198,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  // Helper method to build setting options
   Widget _buildSettingOption({
     required IconData icon,
     required String title,
@@ -240,10 +211,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
           children: [
             Icon(icon, color: Color(0xFF32254B)),
             SizedBox(width: 15),
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 16,
+            Flexible(
+              child: Text(
+                title,
+                style: TextStyle(fontSize: 16),
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ],
@@ -253,7 +225,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 }
 
-// Progress Reset Successful Screen
 class ProgressResetSuccessfulScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -263,10 +234,7 @@ class ProgressResetSuccessfulScreen extends StatelessWidget {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFF32254B),
-              Color(0xFF32254B)
-            ], // Dark purple background
+            colors: [Color(0xFF32254B), Color(0xFF32254B)],
           ),
         ),
         child: SafeArea(
@@ -274,11 +242,10 @@ class ProgressResetSuccessfulScreen extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Logo at the top
                 Padding(
                   padding: EdgeInsets.only(top: 20),
                   child: Text(
-                    "LogoIpsum",
+                    'LogoIpsum',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 20,
@@ -287,7 +254,6 @@ class ProgressResetSuccessfulScreen extends StatelessWidget {
                   ),
                 ),
                 Spacer(),
-                // Success icon
                 Container(
                   width: 80,
                   height: 80,
@@ -295,14 +261,9 @@ class ProgressResetSuccessfulScreen extends StatelessWidget {
                     color: Colors.orange,
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(
-                    Icons.check,
-                    color: Colors.white,
-                    size: 40,
-                  ),
+                  child: Icon(Icons.check, color: Colors.white, size: 40),
                 ),
                 SizedBox(height: 20),
-                // Success message
                 Text(
                   'Progress Reset Successful',
                   style: TextStyle(
@@ -314,13 +275,9 @@ class ProgressResetSuccessfulScreen extends StatelessWidget {
                 SizedBox(height: 10),
                 Text(
                   'Your Progress has been updated.',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                  ),
+                  style: TextStyle(color: Colors.white, fontSize: 16),
                 ),
                 Spacer(),
-                // Back to Home button
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
                   child: ElevatedButton(
@@ -345,7 +302,6 @@ class ProgressResetSuccessfulScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-                // Bottom indicator
                 Container(
                   width: 100,
                   height: 5,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:my_app/screens/settings_screen.dart'; // Add this import
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -9,6 +10,27 @@ class _HomeScreenState extends State<HomeScreen> {
   int currentDay = 1; // Tracks the current day (1–30)
   bool hasCompletedConfiguration = false; // Tracks if configuration is done
 
+  void _openSettings() {
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+      barrierColor: Colors.black.withOpacity(0.5),
+      transitionDuration: Duration(milliseconds: 300),
+      pageBuilder: (context, animation, secondaryAnimation) => SettingsScreen(),
+      transitionBuilder: (context, animation, secondaryAnimation, child) {
+        return SlideTransition(
+          position: Tween<Offset>(
+            begin: Offset(-1, 0), // Start off-screen to the left
+            end: Offset(0, 0), // End at the left edge
+          ).animate(
+              CurvedAnimation(parent: animation, curve: Curves.easeInOut)),
+          child: child,
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -16,20 +38,8 @@ class _HomeScreenState extends State<HomeScreen> {
         title: Text('Home'),
         leading: IconButton(
           icon: Icon(Icons.menu),
-          onPressed: () {
-            // Show settings screen when menu icon is pressed
-            Navigator.pushNamed(context, '/settings');
-          },
+          onPressed: _openSettings, // Open Settings as a slide-in panel
         ),
-        actions: [
-          // Optional: You can also add a settings icon in the app bar actions
-          IconButton(
-            icon: Icon(Icons.settings),
-            onPressed: () {
-              Navigator.pushNamed(context, '/settings');
-            },
-          ),
-        ],
       ),
       body: Center(
         child: Padding(
@@ -42,7 +52,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildHomeContent() {
     if (currentDay <= 30) {
-      // During the 30-day program
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -52,22 +61,19 @@ class _HomeScreenState extends State<HomeScreen> {
           Text(
               'Start your 30-day journey to better rest with science-backed sleep strategies.'),
           SizedBox(height: 20),
-          Text(
-              'Day $currentDay/30 - ${DateTime.now().day} Feb 2025'), // Simple date placeholder
+          Text('Day $currentDay/30 - ${DateTime.now().day} Feb 2025'),
           SizedBox(height: 20),
           ElevatedButton(
             onPressed: () {
               if (currentDay == 1 && !hasCompletedConfiguration) {
-                // Navigate to Configuration screen on Day 1
                 Navigator.pushNamed(context, '/configuration').then((_) {
                   setState(() {
-                    hasCompletedConfiguration =
-                        true; // Mark configuration as complete
-                    _navigateToRandomQuote(); // Navigate to Random Quote on Day 1
+                    hasCompletedConfiguration = true;
+                    _navigateToRandomQuote();
                   });
                 });
               } else {
-                _navigateToSessionInstructions(); // Direct to Session Instructions for subsequent days
+                _navigateToSessionInstructions();
               }
             },
             child: Text('START TODAY\'S SESSION'),
@@ -75,7 +81,6 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       );
     } else {
-      // After 30 days
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -84,16 +89,15 @@ class _HomeScreenState extends State<HomeScreen> {
           ElevatedButton(
             onPressed: () {
               setState(() {
-                currentDay = 1; // Restart the program
-                hasCompletedConfiguration = false; // Reset configuration
+                currentDay = 1;
+                hasCompletedConfiguration = false;
               });
             },
             child: Text('Restart Program'),
           ),
           ElevatedButton(
             onPressed: () {
-              print(
-                  'Fast SleepReset pressed'); // Placeholder for upkeep program
+              print('Fast SleepReset pressed');
             },
             child: Text('Fast SleepReset'),
           ),
@@ -106,7 +110,7 @@ class _HomeScreenState extends State<HomeScreen> {
     Navigator.pushNamed(
       context,
       '/random-quote',
-      arguments: currentDay == 1, // Pass whether it's the first session
+      arguments: currentDay == 1,
     ).then((_) {
       _navigateToSessionInstructions();
     });
@@ -116,14 +120,13 @@ class _HomeScreenState extends State<HomeScreen> {
     Navigator.pushNamed(
       context,
       '/session-instructions',
-      arguments: currentDay == 1, // Pass whether it's the first session
+      arguments: currentDay == 1,
     ).then((_) {
       setState(() {
-        if (currentDay < 30) {
+        if (currentDay < 30)
           currentDay++;
-        } else {
-          currentDay = 31; // Trigger post-30-day state
-        }
+        else
+          currentDay = 31;
       });
     });
   }
