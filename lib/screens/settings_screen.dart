@@ -152,9 +152,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     _buildSettingOption(
                       icon: Icons.description,
                       title: 'Privacy Policy / Terms of Use',
-                      onTap: () {
-                        print('Privacy Policy tapped');
-                      },
+                      onTap: () => Navigator.pushNamed(context,
+                          '/privacy-policy'), // Navigate to Privacy Policy
                     ),
                     _buildSettingOption(
                       icon: Icons.support_agent,
@@ -166,8 +165,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     _buildSettingOption(
                       icon: Icons.info,
                       title: 'About SleepReset',
-                      onTap: () => Navigator.pushNamed(
-                          context, '/about-us'), // Navigate to About Us
+                      onTap: () => Navigator.pushNamed(context, '/about-us'),
                     ),
                   ],
                 ),

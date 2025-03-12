@@ -8,7 +8,8 @@ import 'screens/session_screen.dart';
 import 'screens/session_completion_screen.dart';
 import 'screens/reminders_screen.dart';
 import 'screens/settings_screen.dart';
-import 'screens/about_us_screen.dart'; // Add this import
+import 'screens/about_us_screen.dart';
+import 'screens/privacy_policy_screen.dart'; // Add this import
 import 'package:firebase_core/firebase_core.dart';
 import 'package:my_app/firebase_options.dart';
 
@@ -37,7 +38,8 @@ class MyApp extends StatelessWidget {
         '/session-completion': (context) => SessionCompletionScreen(),
         '/reminders': (context) => RemindersScreen(),
         '/settings': (context) => SettingsScreen(),
-        '/about-us': (context) => AboutUsScreen(), // Add this route
+        '/about-us': (context) => AboutUsScreen(),
+        '/privacy-policy': (context) => PrivacyPolicyScreen(), // Add this route
       },
     );
   }
