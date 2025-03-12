@@ -29,7 +29,8 @@ class _LoginScreenState extends State<LoginScreen> {
       );
       return;
     }
-
+    Navigator.pushReplacementNamed(context, '/home');
+    return;
     setState(() {
       isLoading = true; // Show loading state
     });

@@ -14,7 +14,22 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Home'),
-        leading: Icon(Icons.menu), // Drawer icon (as shown in Figma)
+        leading: IconButton(
+          icon: Icon(Icons.menu),
+          onPressed: () {
+            // Show settings screen when menu icon is pressed
+            Navigator.pushNamed(context, '/settings');
+          },
+        ),
+        actions: [
+          // Optional: You can also add a settings icon in the app bar actions
+          IconButton(
+            icon: Icon(Icons.settings),
+            onPressed: () {
+              Navigator.pushNamed(context, '/settings');
+            },
+          ),
+        ],
       ),
       body: Center(
         child: Padding(
@@ -91,7 +106,7 @@ class _HomeScreenState extends State<HomeScreen> {
     Navigator.pushNamed(
       context,
       '/random-quote',
-      arguments: currentDay == 1, // Pass whether it’s the first session
+      arguments: currentDay == 1, // Pass whether it's the first session
     ).then((_) {
       _navigateToSessionInstructions();
     });
@@ -101,7 +116,7 @@ class _HomeScreenState extends State<HomeScreen> {
     Navigator.pushNamed(
       context,
       '/session-instructions',
-      arguments: currentDay == 1, // Pass whether it’s the first session
+      arguments: currentDay == 1, // Pass whether it's the first session
     ).then((_) {
       setState(() {
         if (currentDay < 30) {
