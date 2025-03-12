@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:my_app/firebase_options.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -38,7 +39,17 @@ class _LoginScreenState extends State<LoginScreen> {
         email: emailController.text.trim(),
         password: passwordController.text.trim(),
       );
-      // If login succeeds, navigate to Home screen
+      // Store or update user data in Firestore
+      User? user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+          'email': user.email,
+          'createdAt': FieldValue.serverTimestamp(),
+          'currentDay': 1, // Start at Day 1
+          'completedSessions': [],
+        }, SetOptions(merge: true));
+      }
+      // Navigate to Home screen after successful login
       Navigator.pushReplacementNamed(context, '/home');
     } on FirebaseAuthException catch (e) {
       String errorMessage;
@@ -94,7 +105,7 @@ class _LoginScreenState extends State<LoginScreen> {
         ElevatedButton(
           onPressed: () {
             print('Login with Google pressed');
-            // You can add Google Sign-In with Firebase Authentication here later
+            // Add Google Sign-In logic here later
           },
           child: Text('Login with Google'),
         ),
