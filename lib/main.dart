@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
-import 'screens/login_screen.dart';
-import 'screens/home_screen.dart';
-import 'screens/configuration_screen.dart';
-import 'screens/random_quote_screen.dart';
-import 'screens/session_instructions_screen.dart';
-import 'screens/session_screen.dart';
-import 'screens/session_completion_screen.dart';
-import 'screens/reminders_screen.dart';
-import 'screens/settings_screen.dart';
-import 'screens/about_us_screen.dart';
-import 'screens/privacy_policy_screen.dart'; // Add this import
+import 'package:my_app/screens/login_screen.dart';
+import 'package:my_app/screens/home_screen.dart';
+import 'package:my_app/screens/configuration_screen.dart';
+import 'package:my_app/screens/random_quote_screen.dart';
+import 'package:my_app/screens/session_instructions_screen.dart';
+import 'package:my_app/screens/session_screen.dart';
+import 'package:my_app/screens/session_completion_screen.dart';
+import 'package:my_app/screens/reminders_screen.dart';
+import 'package:my_app/screens/settings_screen.dart';
+import 'package:my_app/screens/about_us_screen.dart';
+import 'package:my_app/screens/privacy_policy_screen.dart';
+import 'package:my_app/screens/change_password_screen.dart'; // Add this import
 import 'package:firebase_core/firebase_core.dart';
 import 'package:my_app/firebase_options.dart';
 
@@ -39,7 +40,9 @@ class MyApp extends StatelessWidget {
         '/reminders': (context) => RemindersScreen(),
         '/settings': (context) => SettingsScreen(),
         '/about-us': (context) => AboutUsScreen(),
-        '/privacy-policy': (context) => PrivacyPolicyScreen(), // Add this route
+        '/privacy-policy': (context) => PrivacyPolicyScreen(),
+        '/change-password': (context) =>
+            ChangePasswordScreen(), // Add this route
       },
     );
   }

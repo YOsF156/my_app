@@ -140,9 +140,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     _buildSettingOption(
                       icon: Icons.lock,
                       title: 'Change Password',
-                      onTap: () {
-                        print('Change Password tapped');
-                      },
+                      onTap: () => Navigator.pushNamed(context,
+                          '/change-password'), // Navigate to Change Password
                     ),
                     _buildSettingOption(
                       icon: Icons.access_time,
@@ -152,8 +151,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     _buildSettingOption(
                       icon: Icons.description,
                       title: 'Privacy Policy / Terms of Use',
-                      onTap: () => Navigator.pushNamed(context,
-                          '/privacy-policy'), // Navigate to Privacy Policy
+                      onTap: () =>
+                          Navigator.pushNamed(context, '/privacy-policy'),
                     ),
                     _buildSettingOption(
                       icon: Icons.support_agent,
