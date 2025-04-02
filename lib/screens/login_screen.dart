@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
-import 'package:my_app/firebase_options.dart';
 import 'package:my_app/providers/user_provider.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -15,8 +13,8 @@ class _LoginScreenState extends State<LoginScreen> {
   bool isEmailLogin = false;
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  bool isLoading = false; // Add loading state for login
-  bool _obscurePassword = true; // Password visibility toggle
+  bool isLoading = false;
+  bool _obscurePassword = true;
 
   @override
   void dispose() {
@@ -34,11 +32,10 @@ class _LoginScreenState extends State<LoginScreen> {
     }
 
     setState(() {
-      isLoading = true; // Show loading state
+      isLoading = true;
     });
 
     try {
-      // Sign in with Firebase Auth
       UserCredential userCredential =
           await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: emailController.text.trim(),
@@ -46,62 +43,27 @@ class _LoginScreenState extends State<LoginScreen> {
       );
       print('User signed in: ${userCredential.user?.uid}');
 
-      // Refresh the authentication token to ensure Firestore gets a valid token
-      await FirebaseAuth.instance.currentUser?.getIdToken(true);
-      print('Auth token refreshed: ${FirebaseAuth.instance.currentUser?.uid}');
-
-      // Wait for auth state to propagate
-      await Future.delayed(Duration(milliseconds: 500));
-
-      // Get the user from Firebase Auth
-      User? user = FirebaseAuth.instance.currentUser;
+      User? user = userCredential.user;
       if (user != null) {
-        // Check if user document exists in Firestore
         DocumentSnapshot userDoc = await FirebaseFirestore.instance
             .collection('users')
             .doc(user.uid)
             .get();
 
         if (!userDoc.exists) {
-          // If the document doesn't exist, create it with initial data
-          try {
-            await FirebaseFirestore.instance
-                .collection('users')
-                .doc(user.uid)
-                .set({
-              'email': user.email,
-              'createdAt': FieldValue.serverTimestamp(),
-              'currentDay': 1, // Start at Day 1
-              'completedSessions': [],
-              'hasCompletedConfiguration': false, // Initialize this field
-            }, SetOptions(merge: true));
-            print('User data written to Firestore successfully');
-          } catch (firestoreError) {
-            print('Firestore write failed during login: $firestoreError');
-            // Proceed with navigation even if Firestore fails
-          }
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .set({
+            'email': user.email,
+            'createdAt': FieldValue.serverTimestamp(),
+            'currentDay': 1,
+            'completedSessions': [],
+            'hasCompletedConfiguration': false,
+            'lastLogin': FieldValue.serverTimestamp(),
+          });
+          print('User data written to Firestore successfully');
         } else {
-          print('User document already exists in Firestore: ${userDoc.data()}');
-          // Ensure hasCompletedConfiguration exists in the document
-          if (!(userDoc.data() as Map<String, dynamic>)
-              .containsKey('hasCompletedConfiguration')) {
-            try {
-              await FirebaseFirestore.instance
-                  .collection('users')
-                  .doc(user.uid)
-                  .set({
-                'hasCompletedConfiguration': false,
-              }, SetOptions(merge: true));
-              print(
-                  'Added missing hasCompletedConfiguration field to Firestore');
-            } catch (firestoreError) {
-              print('Failed to add hasCompletedConfiguration: $firestoreError');
-            }
-          }
-        }
-
-        // Update lastLogin timestamp regardless of whether the document existed
-        try {
           await FirebaseFirestore.instance
               .collection('users')
               .doc(user.uid)
@@ -109,12 +71,8 @@ class _LoginScreenState extends State<LoginScreen> {
             'lastLogin': FieldValue.serverTimestamp(),
           }, SetOptions(merge: true));
           print('Last login timestamp updated in Firestore');
-        } catch (firestoreError) {
-          print('Failed to update last login timestamp: $firestoreError');
-          // Proceed with navigation even if Firestore fails
         }
 
-        // Fetch user data from Firestore to store in app-wide state
         DocumentSnapshot updatedUserDoc = await FirebaseFirestore.instance
             .collection('users')
             .doc(user.uid)
@@ -122,35 +80,21 @@ class _LoginScreenState extends State<LoginScreen> {
 
         if (updatedUserDoc.exists) {
           final userData = updatedUserDoc.data() as Map<String, dynamic>;
-          // Update app-wide state with user details
           final userProvider =
               Provider.of<UserProvider>(context, listen: false);
           userProvider.setUserDetails(
             uid: user.uid,
             email: user.email ?? '',
-            createdAt: userData.containsKey('createdAt')
-                ? (updatedUserDoc.get('createdAt') as Timestamp?)?.toDate()
-                : null,
-            currentDay: userData.containsKey('currentDay')
-                ? updatedUserDoc.get('currentDay')
-                : 1,
-            completedSessions: userData.containsKey('completedSessions')
-                ? List<String>.from(
-                    updatedUserDoc.get('completedSessions') ?? [])
-                : [],
-            lastLogin: userData.containsKey('lastLogin')
-                ? (updatedUserDoc.get('lastLogin') as Timestamp?)?.toDate()
-                : null,
+            createdAt: userData['createdAt']?.toDate(),
+            currentDay: userData['currentDay'] ?? 1,
+            completedSessions:
+                List<String>.from(userData['completedSessions'] ?? []),
+            lastLogin: userData['lastLogin']?.toDate(),
             hasCompletedConfiguration:
-                userData.containsKey('hasCompletedConfiguration')
-                    ? updatedUserDoc.get('hasCompletedConfiguration')
-                    : false,
+                userData['hasCompletedConfiguration'] ?? false,
           );
           print('User details stored in app-wide state');
         }
-
-        // Navigate to Home screen after successful login
-        Navigator.pushReplacementNamed(context, '/home');
       }
     } on FirebaseAuthException catch (e) {
       String errorMessage;
@@ -173,7 +117,7 @@ class _LoginScreenState extends State<LoginScreen> {
       );
     } finally {
       setState(() {
-        isLoading = false; // Hide loading state
+        isLoading = false;
       });
     }
   }
@@ -196,7 +140,7 @@ class _LoginScreenState extends State<LoginScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  'LogoIpsum', // Placeholder for logo text
+                  'LogoIpsum',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 24,
@@ -268,7 +212,6 @@ class _LoginScreenState extends State<LoginScreen> {
         ElevatedButton(
           onPressed: () {
             print('Login with Google pressed');
-            // Add Google Sign-In logic here later
           },
           style: ElevatedButton.styleFrom(
             minimumSize: Size(double.infinity, 50),

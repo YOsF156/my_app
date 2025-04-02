@@ -39,6 +39,7 @@ dependencies:
   firebase_auth: ^5.5.1
   cloud_firestore: ^5.6.5
   provider: ^6.1.2
+  flutter_svg: ^2.0.9
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -62,6 +63,18 @@ flutter:
   assets:
     - assets/audio/ABCD.mp3
     - assets/moon.gif
+    - assets/images/
+    - assets/images/background_ellipse.svg
+    - assets/images/circle_component.svg
+    - assets/images/menu_vector1.svg
+    - assets/images/menu_vector2.svg
+    - assets/images/menu_vector3.svg
+    - assets/images/profile_image.png
+    - assets/images/component_14.png
+    - assets/images/date_vector.svg
+    - assets/images/session/man_illustration.svg
+    - assets/images/session/ellipse_35_top.svg
+    - assets/images/session/ellipse_37.svg
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg
@@ -78,6 +91,15 @@ flutter:
   # "family" key with the font family name, and a "fonts" key with a
   # list giving the asset and other descriptors for the font. For
   # example:
+  fonts:
+    - family: DM Sans
+      fonts:
+        - asset: assets/fonts/DMSans-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/DMSans-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/DMSans-Bold.ttf
+          weight: 700
   # fonts:
   #   - family: Schyler
   #     fonts:
