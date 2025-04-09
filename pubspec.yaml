@@ -71,10 +71,16 @@ flutter:
     - assets/images/menu_vector3.svg
     - assets/images/profile_image.png
     - assets/images/component_14.png
-    - assets/images/date_vector.svg
     - assets/images/session/man_illustration.svg
+    - assets/images/date_vector.svg
+    - assets/images/ellipse_around_circle.svg
     - assets/images/session/ellipse_35_top.svg
     - assets/images/session/ellipse_37.svg
+    - assets/images/purple_star.svg
+    - assets/images/yellow_star.svg
+    - assets/images/earphones.svg
+    - assets/images/earphones_ellipse.svg
+    - assets/images/rectangle_up.svg
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg
